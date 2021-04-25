@@ -11,7 +11,12 @@ const {
  */
 const activate = async (context) => {
   let disposable = vscode.commands.registerCommand("stack-search.start", () => {
-    vscode.window.showInformationMessage("Stack search is now active");
+    vscode.window.showInformationMessage(`Hello from Stack Search!
+Press: shift & \` for bringing up the search
+Press: escape to exit search once satisfied
+Press: shift & u for undoing the last code block pasted from stack-search
+Press: shift & + to see the next answer
+Press: shift & - to see the previous answer`);
   });
 
   let pop = vscode.commands.registerCommand("stack-search.pop", () => {

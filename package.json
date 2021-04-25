@@ -1,0 +1,69 @@
+{
+  "name": "stack-search",
+  "displayName": "Stack Search",
+  "description": "Stack Search helps you to be more productive and makes your search for answers easier, instead of having to search through forums, stack search will give you your answer withing VS Code.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.55.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:stack-search.start",
+    "onCommand:stack-search.pop",
+    "onCommand:stack-search.undo"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "stack-search.start",
+        "title": "activate stack search"
+      },
+      {
+        "key": "",
+        "command": "stack-search.pop",
+        "title": "stack-search"
+      },
+      {
+        "key": "",
+        "command": "stack-search.undo",
+        "title": "undo stack-search"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "stack-search.pop",
+        "key": "shift+`",
+        "mac": "shift+`"
+      },
+      {
+        "command": "stack-search.undo",
+        "key": "shift+u",
+        "mac": "shift+u"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.0.4",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.55.0",
+    "eslint": "^7.19.0",
+    "glob": "^7.1.6",
+    "mocha": "^8.2.1",
+    "typescript": "^4.1.3",
+    "vscode-test": "^1.5.0"
+  },
+  "dependencies": {
+    "autocorrect": "^1.2.0",
+    "html-to-text": "^7.1.1",
+    "node-fetch": "^2.6.1"
+  }
+}

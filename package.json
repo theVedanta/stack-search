@@ -12,7 +12,9 @@
   "activationEvents": [
     "onCommand:stack-search.start",
     "onCommand:stack-search.pop",
-    "onCommand:stack-search.undo"
+    "onCommand:stack-search.undo",
+    "onCommand:stack-search.next",
+    "onCommand:stack-search.prev"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -30,6 +32,16 @@
         "key": "",
         "command": "stack-search.undo",
         "title": "undo stack-search"
+      },
+      {
+        "key": "",
+        "command": "stack-search.next",
+        "title": "next answer stack-search"
+      },
+      {
+        "key": "",
+        "command": "stack-search.prev",
+        "title": "previous answer stack-search"
       }
     ],
     "keybindings": [
@@ -42,6 +54,16 @@
         "command": "stack-search.undo",
         "key": "shift+u",
         "mac": "shift+u"
+      },
+      {
+        "command": "stack-search.next",
+        "key": "shift+=",
+        "mac": "shift+="
+      },
+      {
+        "command": "stack-search.prev",
+        "key": "shift+-",
+        "mac": "shift+-"
       }
     ]
   },

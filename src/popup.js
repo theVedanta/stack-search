@@ -1,21 +1,43 @@
 const vsc = require("vscode");
 const fetch = require("node-fetch");
 const { htmlToText } = require("html-to-text");
-const autocorrect = require("autocorrect")();
 var prev = undefined;
-
-/**
- * @param {vscode.ExtensionContext} context
- */
+let answerIndex = 0;
+let answers = [];
+let noAnswers = [];
+const editor = vsc.window.activeTextEditor;
 
 // API - https://api.stackexchange.com/search/advanced?site=stackoverflow.com&q=${something}
 
-const showWindow = async () => {
-  let noAnswers = [];
-  let answers = [];
-  let answerIndex = 0;
+// 9810736503 - sunil dubey - medanta (sandeep) ayushmann
 
-  const editor = vsc.window.activeTextEditor;
+function decodeHTMLEntities(text) {
+  var entities = [
+    ["amp", "&"],
+    ["apos", "'"],
+    ["#x27", "'"],
+    ["#x2F", "/"],
+    ["#39", "'"],
+    ["#47", "/"],
+    ["lt", "<"],
+    ["gt", ">"],
+    ["nbsp", " "],
+    ["quot", '"'],
+  ];
+
+  for (var i = 0, max = entities.length; i < max; ++i)
+    text = text.replace(
+      new RegExp("&" + entities[i][0] + ";", "g"),
+      entities[i][1]
+    );
+
+  return text;
+}
+
+const showWindow = async () => {
+  noAnswers = [];
+  answers = [];
+  answerIndex = 0;
 
   if (!editor) {
     vsc.window.showErrorMessage("No editor open!");
@@ -31,21 +53,8 @@ const showWindow = async () => {
 
   var x = await getUserInfo();
 
-  x = x.split(" ");
-  let finalString = "";
-  let correctWords = [];
-
-  for (let y of x) {
-    let correct = autocorrect(y);
-    correctWords.push(correct);
-  }
-
-  for (let word of correctWords) {
-    finalString += `${word} `;
-  }
-
   const quickPick = vsc.window.createQuickPick();
-  const query = finalString.trim();
+  const query = x.trim();
 
   const res = await fetch(
     `https://api.stackexchange.com/2.2/search/advanced?order=desc&sort=relevance&q=${query}&site=stackoverflow`
@@ -55,7 +64,7 @@ const showWindow = async () => {
   quickPick.items = data.items
     .filter((item) => item.is_answered)
     .map((item) => ({
-      label: item.title,
+      label: decodeHTMLEntities(item.title),
       id: item.question_id,
     }));
 
@@ -65,7 +74,9 @@ const showWindow = async () => {
     quickPick.onDidChangeActive(async (item) => {
       quickPick.placeholder = query;
       if (answers.length !== 0 || noAnswers.length !== 0) {
-        undopaste();
+        try {
+          undopaste();
+        } catch (err) {}
       }
 
       answers = [];
@@ -86,7 +97,7 @@ const showWindow = async () => {
             )
             .trim();
 
-          if (ansBody.length <= 25) {
+          if (ansBody.length <= 20) {
             ansBody = answr.body
               .slice(
                 answr.body.indexOf("<code>", answr.body.indexOf("<code>") + 1) +
@@ -95,7 +106,7 @@ const showWindow = async () => {
               )
               .trim();
           }
-          answers.push(ansBody);
+          answers.push(decodeHTMLEntities(ansBody));
         } else {
           noAnswers.push(htmlToText(answr.body));
         }
@@ -105,14 +116,14 @@ const showWindow = async () => {
         vsc.window.showWarningMessage(
           "No code found in answer, showing info instead"
         );
-        vsc.window.showInformationMessage(noAnswers[0]);
+        vsc.window.showInformationMessage(noAnswers[answerIndex]);
         return;
       }
 
       editor.edit((edit) => {
         edit.insert(editor.selection.active, answers[answerIndex]);
       });
-      const lines = answers[0].split(/\r\n|\r|\n/).length;
+      const lines = answers[answerIndex].split(/\r\n|\r|\n/).length;
 
       prev = { line: editor.selection.active._line, lines: lines };
     });
@@ -123,7 +134,6 @@ const showWindow = async () => {
 };
 
 function undopaste() {
-  const editor = vsc.window.activeTextEditor;
   editor.edit((edit) => {
     const area = editor.selection;
     area._start._line = prev.line;
@@ -134,4 +144,49 @@ function undopaste() {
   });
 }
 
-module.exports = { showWindow, undopaste };
+function increamentAnswerIndex() {
+  undopaste();
+  answerIndex++;
+  if (answers[answerIndex] !== undefined) {
+    if (answers.length === 0) {
+      vsc.window.showWarningMessage(
+        "No code found in answer, showing info instead"
+      );
+      vsc.window.showInformationMessage(noAnswers[answerIndex]);
+    } else {
+      editor.edit((edit) => {
+        edit.insert(editor.selection.active, `${answers[answerIndex]}`);
+      });
+    }
+  } else {
+    answerIndex--;
+    vsc.window.showErrorMessage("No more answers!");
+  }
+}
+
+function decrementAnswerIndex() {
+  undopaste();
+  answerIndex--;
+  if (answers[answerIndex] !== undefined) {
+    if (answers.length === 0) {
+      vsc.window.showWarningMessage(
+        "No code found in answer, showing info instead"
+      );
+      vsc.window.showInformationMessage(noAnswers[answerIndex]);
+    } else {
+      editor.edit((edit) => {
+        edit.insert(editor.selection.active, `${answers[answerIndex]}`);
+      });
+    }
+  } else {
+    answerIndex++;
+    vsc.window.showErrorMessage("No more answers!");
+  }
+}
+
+module.exports = {
+  showWindow,
+  undopaste,
+  increamentAnswerIndex,
+  decrementAnswerIndex,
+};

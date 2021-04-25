@@ -1,5 +1,10 @@
 const vscode = require("vscode");
-const { showWindow, undopaste } = require("./src/popup");
+const {
+  showWindow,
+  undopaste,
+  increamentAnswerIndex,
+  decrementAnswerIndex,
+} = require("./src/popup");
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -17,7 +22,19 @@ const activate = async (context) => {
     undopaste();
   });
 
-  context.subscriptions.push(disposable, pop, undo);
+  let next = vscode.commands.registerCommand("stack-search.next", async () => {
+    try {
+      increamentAnswerIndex();
+    } catch (err) {}
+  });
+
+  let prev = vscode.commands.registerCommand("stack-search.prev", async () => {
+    try {
+      decrementAnswerIndex();
+    } catch (err) {}
+  });
+
+  context.subscriptions.push(disposable, pop, undo, prev);
 };
 const deactivate = () => {};
 

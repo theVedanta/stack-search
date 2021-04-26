@@ -120,6 +120,10 @@ const showWindow = async () => {
         return;
       }
 
+      while (answers[answerIndex].split(/\r\n|\r|\n/).length == 1) {
+        answerIndex += 1;
+      }
+
       editor.edit((edit) => {
         edit.insert(editor.selection.active, answers[answerIndex]);
       });

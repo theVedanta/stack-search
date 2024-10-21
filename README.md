@@ -1,5 +1,7 @@
 # stack-search
 
+[Youtube Link](https://youtu.be/rc7fjWIpnxE)
+
 This readme icludes all the necessary information regarding the VS Code extension, stack-search, developed by the Code Warriors. stack-search is a search engine that helps you improve your efficiency while writing code. It makes your everyday programming productive.
 
 ## The Idea
